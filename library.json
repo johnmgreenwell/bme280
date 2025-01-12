@@ -1,0 +1,35 @@
+{
+  "name": "BME280",
+  "keywords": "i2c, sensor, temperature, pressure, altitude, humidity",
+  "description": "Driver for Bosch BME280",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/johnmgreenwell/bme280"
+  },
+  "authors": 
+  [
+    {
+      "name": "Adafruit",
+      "maintainer": false
+    },
+    {
+      "name": "johnmgreenwell",
+      "maintainer": true
+    }
+  ],
+  "dependencies":
+  {
+    "Adafruit Unified Sensor Driver": "https://github.com/adafruit/Adafruit_Sensor.git"
+  },
+  "version": "1.0.0",
+  "license": "BSD",
+  "frameworks": "*",
+  "platforms": "*",
+  "build": {
+    "libArchive": false,
+    "flags": [
+    "-I../../include"
+    ]
+  }
+}
