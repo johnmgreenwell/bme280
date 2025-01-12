@@ -15,17 +15,19 @@
  *
  * BSD license, all text here must be included in any redistribution.
  * See the LICENSE file for details.
+ * 
+ * Modified by John Greenwell for custom HAL, 2025
  *
  */
 
 #ifndef __BME280_H__
 #define __BME280_H__
 
-#include "Arduino.h"
-
-#include <Adafruit_I2CDevice.h>
-#include <Adafruit_SPIDevice.h>
+#include "hal.h"
 #include <Adafruit_Sensor.h>
+
+namespace PeripheralIO
+{
 
 /*!
  *  @brief  default I2C address
@@ -105,48 +107,48 @@ typedef struct {
 } bme280_calib_data;
 /*=========================================================================*/
 
-class Adafruit_BME280;
+class BME280;
 
 /** Adafruit Unified Sensor interface for temperature component of BME280 */
-class Adafruit_BME280_Temp : public Adafruit_Sensor {
+class BME280_Temp : public Adafruit_Sensor {
 public:
   /** @brief Create an Adafruit_Sensor compatible object for the temp sensor
       @param parent A pointer to the BME280 class */
-  Adafruit_BME280_Temp(Adafruit_BME280 *parent) { _theBME280 = parent; }
+  BME280_Temp(BME280 *parent) { _theBME280 = parent; }
   bool getEvent(sensors_event_t *);
   void getSensor(sensor_t *);
 
 private:
   int _sensorID = 280;
-  Adafruit_BME280 *_theBME280 = NULL;
+  BME280 *_theBME280 = NULL;
 };
 
 /** Adafruit Unified Sensor interface for pressure component of BME280 */
-class Adafruit_BME280_Pressure : public Adafruit_Sensor {
+class BME280_Pressure : public Adafruit_Sensor {
 public:
   /** @brief Create an Adafruit_Sensor compatible object for the pressure sensor
       @param parent A pointer to the BME280 class */
-  Adafruit_BME280_Pressure(Adafruit_BME280 *parent) { _theBME280 = parent; }
+  BME280_Pressure(BME280 *parent) { _theBME280 = parent; }
   bool getEvent(sensors_event_t *);
   void getSensor(sensor_t *);
 
 private:
   int _sensorID = 280;
-  Adafruit_BME280 *_theBME280 = NULL;
+  BME280 *_theBME280 = NULL;
 };
 
 /** Adafruit Unified Sensor interface for humidity component of BME280 */
-class Adafruit_BME280_Humidity : public Adafruit_Sensor {
+class BME280_Humidity : public Adafruit_Sensor {
 public:
   /** @brief Create an Adafruit_Sensor compatible object for the humidity sensor
       @param parent A pointer to the BME280 class */
-  Adafruit_BME280_Humidity(Adafruit_BME280 *parent) { _theBME280 = parent; }
+  BME280_Humidity(BME280 *parent) { _theBME280 = parent; }
   bool getEvent(sensors_event_t *);
   void getSensor(sensor_t *);
 
 private:
   int _sensorID = 280;
-  Adafruit_BME280 *_theBME280 = NULL;
+  BME280 *_theBME280 = NULL;
 };
 
 /**************************************************************************/
@@ -154,7 +156,7 @@ private:
     @brief  Class that stores state and functions for interacting with BME280 IC
 */
 /**************************************************************************/
-class Adafruit_BME280 {
+class BME280 {
 public:
   /**************************************************************************/
   /*!
@@ -211,11 +213,11 @@ public:
   };
 
   // constructors
-  Adafruit_BME280();
-  Adafruit_BME280(int8_t cspin, SPIClass *theSPI = &SPI);
-  Adafruit_BME280(int8_t cspin, int8_t mosipin, int8_t misopin, int8_t sckpin);
-  ~Adafruit_BME280(void);
-  bool begin(uint8_t addr = BME280_ADDRESS, TwoWire *theWire = &Wire);
+  BME280(HAL::I2C& i2c);
+  // Adafruit_BME280(int8_t cspin, SPIClass *theSPI = &SPI);
+  // Adafruit_BME280(int8_t cspin, int8_t mosipin, int8_t misopin, int8_t sckpin);
+  ~BME280(void);
+  bool begin(uint8_t addr = BME280_ADDRESS_ALTERNATE);
   bool init();
 
   void setSampling(sensor_mode mode = MODE_NORMAL,
@@ -242,16 +244,14 @@ public:
   Adafruit_Sensor *getHumiditySensor(void);
 
 protected:
-  Adafruit_I2CDevice *i2c_dev = NULL; ///< Pointer to I2C bus interface
-  Adafruit_SPIDevice *spi_dev = NULL; ///< Pointer to SPI bus interface
 
-  Adafruit_BME280_Temp *temp_sensor = NULL;
+  BME280_Temp *temp_sensor = NULL;
   //!< Adafruit_Sensor compat temperature sensor component
 
-  Adafruit_BME280_Pressure *pressure_sensor = NULL;
+  BME280_Pressure *pressure_sensor = NULL;
   //!< Adafruit_Sensor compat pressure sensor component
 
-  Adafruit_BME280_Humidity *humidity_sensor = NULL;
+  BME280_Humidity *humidity_sensor = NULL;
   //!< Adafruit_Sensor compat humidity sensor component
 
   void readCoefficients(void);
@@ -265,6 +265,7 @@ protected:
   uint16_t read16_LE(byte reg); // little endian
   int16_t readS16_LE(byte reg); // little endian
 
+  HAL::I2C& _i2c;
   uint8_t _i2caddr;  //!< I2C addr for the TwoWire interface
   int32_t _sensorID; //!< ID of the BME Sensor
   int32_t t_fine; //!< temperature with high resolution, stored as an attribute
@@ -368,5 +369,7 @@ protected:
   };
   ctrl_hum _humReg; //!< hum register object
 };
+
+}
 
 #endif
